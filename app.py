@@ -29,8 +29,11 @@ def get_conn():
         port=int(os.getenv("DB_PORT", "3306")),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME", "todo_db"),
-    )
+        database=os.getenv("DB_NAME", "todo_db"),  
+        connection_timeout=5
+)
+
+    
 
 # --- Auth helpers ---
 def login_required(view_func):
