@@ -2,32 +2,781 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Todo List</title>
+    <title>Todo List - Daily Routine</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='styles.css') }}"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 20px;
+        background: linear-gradient(
+          180deg,
+          #87ceeb 0%,
+          #e0f6ff 50%,
+          #b3e5fc 100%
+        );
+        overflow-x: hidden;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        position: relative;
+      }
+
+      /* Background Animation Container */
+      .bg-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        background: linear-gradient(
+          180deg,
+          #87ceeb 0%,
+          #e0f6ff 50%,
+          #b3e5fc 100%
+        );
+        overflow: hidden;
+      }
+
+      /* Sun */
+      .sun {
+        position: fixed;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle at 40% 40%, #ffd700, #ffa500);
+        border-radius: 50%;
+        top: 8%;
+        right: 8%;
+        box-shadow: 0 0 60px rgba(255, 215, 0, 0.6);
+        z-index: 1;
+        animation: sunGlow 4s ease-in-out infinite;
+      }
+
+      @keyframes sunGlow {
+        0%,
+        100% {
+          box-shadow: 0 0 60px rgba(255, 215, 0, 0.6);
+        }
+        50% {
+          box-shadow: 0 0 80px rgba(255, 215, 0, 0.8);
+        }
+      }
+
+      /* Cloud SVG Base */
+      .cloud-svg {
+        position: fixed;
+        z-index: 2;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
+      }
+
+      .cloud-1 {
+        width: 180px;
+        height: 80px;
+        top: 5%;
+        left: 5%;
+        animation: float1 20s infinite ease-in-out;
+      }
+
+      .cloud-2 {
+        width: 200px;
+        height: 90px;
+        top: 18%;
+        left: 70%;
+        animation: float2 25s infinite ease-in-out;
+      }
+
+      .cloud-3 {
+        width: 160px;
+        height: 75px;
+        top: 35%;
+        left: 10%;
+        animation: float3 22s infinite ease-in-out;
+      }
+
+      .cloud-4 {
+        width: 190px;
+        height: 85px;
+        top: 50%;
+        right: 5%;
+        animation: float1 24s infinite ease-in-out 2s;
+      }
+
+      .cloud-5 {
+        width: 170px;
+        height: 78px;
+        top: 62%;
+        left: 50%;
+        animation: float2 26s infinite ease-in-out 1s;
+      }
+
+      .cloud-6 {
+        width: 210px;
+        height: 95px;
+        bottom: 10%;
+        left: 20%;
+        animation: float3 28s infinite ease-in-out 3s;
+      }
+
+      @keyframes float1 {
+        0%,
+        100% {
+          transform: translateX(0) translateY(0);
+        }
+        25% {
+          transform: translateX(30px) translateY(-15px);
+        }
+        50% {
+          transform: translateX(60px) translateY(0);
+        }
+        75% {
+          transform: translateX(30px) translateY(15px);
+        }
+      }
+
+      @keyframes float2 {
+        0%,
+        100% {
+          transform: translateX(0) translateY(0);
+        }
+        25% {
+          transform: translateX(-40px) translateY(10px);
+        }
+        50% {
+          transform: translateX(-80px) translateY(0);
+        }
+        75% {
+          transform: translateX(-40px) translateY(-10px);
+        }
+      }
+
+      @keyframes float3 {
+        0%,
+        100% {
+          transform: translateX(0) translateY(0);
+        }
+        25% {
+          transform: translateX(50px) translateY(20px);
+        }
+        50% {
+          transform: translateX(100px) translateY(0);
+        }
+        75% {
+          transform: translateX(50px) translateY(-20px);
+        }
+      }
+
+      /* Todo Panel */
+      .todo-panel {
+        position: relative;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 40px;
+        padding: 50px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        width: 100%;
+        max-width: 700px;
+        animation: slideInPanel 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-sizing: border-box;
+      }
+
+      @keyframes slideInPanel {
+        from {
+          opacity: 0;
+          transform: translateY(50px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .panel-header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .panel-title {
+        font-size: 3 5em;
+        color: #1565c0;
+        margin-bottom: 15px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .panel-subtitle {
+        font-size: 1.2em;
+        color: #546e7a;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        margin-bottom: 20px;
+      }
+
+      .panel-divider {
+        border: none;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(33, 150, 243, 0.3),
+          transparent
+        );
+        margin: 20px 0 0 0;
+      }
+
+      .logout-btn {
+        display: inline-block;
+        background: linear-gradient(135deg, #2196f3, #1976d2);
+        padding: 10px 24px;
+        color: #ffffff;
+        text-decoration: none;
+        transition: all 0.4s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 0.95em;
+        position: relative;
+        letter-spacing: 0.8px;
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+      }
+
+      .logout-btn:hover {
+        background: linear-gradient(135deg, #1976d2, #1565c0);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+      }
+
+      .add-task {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 35px;
+      }
+
+      .add-task input {
+        flex: 1;
+        padding: 18px 22px;
+        background: rgba(33, 150, 243, 0.08);
+        border: 2.5px solid rgba(33, 150, 243, 0.3);
+        border-radius: 12px;
+        color: #333333;
+        font-size: 1.1em;
+        font-weight: 600;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .add-task input::placeholder {
+        color: rgba(84, 110, 122, 0.7);
+        font-weight: 600;
+      }
+
+      .add-task input:focus {
+        outline: none;
+        background: rgba(33, 150, 243, 0.12);
+        border-color: rgba(33, 150, 243, 0.8);
+        box-shadow: 0 0 20px rgba(33, 150, 243, 0.2);
+      }
+
+      .btn-add {
+        padding: 18px 32px;
+        background: linear-gradient(135deg, #2196f3, #1976d2);
+        border: 2px solid transparent;
+        border-radius: 12px;
+        color: #ffffff;
+        font-size: 1.05em;
+        font-weight: 900;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+      }
+
+      .btn-add:hover {
+        background: linear-gradient(135deg, #1976d2, #1565c0);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+      }
+
+      .btn-add:active {
+        transform: translateY(-1px);
+      }
+
+      .task-list {
+        list-style: none;
+        margin-bottom: 30px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 10px;
+      }
+
+      .task-list::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .task-list::-webkit-scrollbar-track {
+        background: rgba(33, 150, 243, 0.05);
+        border-radius: 10px;
+      }
+
+      .task-list::-webkit-scrollbar-thumb {
+        background: rgba(33, 150, 243, 0.3);
+        border-radius: 10px;
+      }
+
+      .task-list::-webkit-scrollbar-thumb:hover {
+        background: rgba(33, 150, 243, 0.5);
+      }
+
+      .task-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 18px;
+        margin-bottom: 12px;
+        background: rgba(33, 150, 243, 0.08);
+        border: 2px solid rgba(33, 150, 243, 0.2);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        animation: slideIn 0.4s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .task-item:hover {
+        background: rgba(33, 150, 243, 0.12);
+        border-color: rgba(33, 150, 243, 0.4);
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.1);
+      }
+
+      .task-item.completed {
+        opacity: 0.7;
+        background: rgba(76, 175, 80, 0.1);
+        border-color: rgba(76, 175, 80, 0.3);
+      }
+
+      .task-item.completed .task-title {
+        text-decoration: line-through !important;
+        color: #90a4ae !important;
+      }
+
+      .task-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        cursor: pointer;
+        flex: 1;
+      }
+
+      .toggle {
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        accent-color: #2196f3;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+      }
+
+      .toggle:hover {
+        transform: scale(1.1);
+      }
+
+      .task-title {
+        color: #333333;
+        font-size: 1.05em;
+        font-weight: 600;
+        word-break: break-word;
+        transition: all 0.3s ease;
+      }
+
+      .task-right {
+        margin-left: 10px;
+      }
+
+      .icon-btn {
+        background: none;
+        border: none;
+        font-size: 1.3em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 5px 8px;
+        border-radius: 6px;
+      }
+
+      .icon-btn:hover {
+        transform: scale(1.2);
+        background: rgba(244, 67, 54, 0.15);
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+      }
+
+      .page-info {
+        color: #546e7a;
+        font-weight: 600;
+        font-size: 0.95em;
+      }
+
+      .btn.ghost {
+        display: inline-block;
+        background: rgba(33, 150, 243, 0.15);
+        padding: 10px 20px;
+        color: #1565c0;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid rgba(33, 150, 243, 0.3);
+        border-radius: 8px;
+        font-weight: 800;
+        font-size: 0.9em;
+      }
+
+      .btn.ghost:hover:not(.disabled) {
+        background: rgba(33, 150, 243, 0.25);
+        border-color: rgba(33, 150, 243, 0.5);
+        transform: translateY(-2px);
+        color: #1976d2;
+      }
+
+      .btn.ghost.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      @media (max-width: 768px) {
+        .todo-panel {
+          padding: 40px 30px;
+          border-radius: 30px;
+        }
+
+        .panel-title {
+          font-size: 2 5em;
+        }
+
+        .panel-subtitle {
+          font-size: 1.05em;
+        }
+
+        .add-task {
+          flex-direction: column;
+        }
+
+        .btn-add {
+          width: 100%;
+        }
+
+        .task-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .task-right {
+          width: 100%;
+          margin-left: 0;
+          text-align: right;
+        }
+
+        .pagination {
+          gap: 10px;
+          font-size: 0.9em;
+        }
+
+        .cloud-svg {
+          display: none;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 20px 15px;
+        }
+
+        .todo-panel {
+          padding: 30px 20px;
+          border-radius: 25px;
+        }
+
+        .panel-title {
+          font-size: 2em;
+        }
+
+        .panel-subtitle {
+          font-size: 0.95em;
+        }
+
+        .add-task {
+          gap: 10px;
+        }
+
+        .add-task input,
+        .btn-add {
+          font-size: 1em;
+        }
+
+        .task-item {
+          padding: 14px 16px;
+        }
+
+        .task-title {
+          font-size: 1em;
+        }
+
+        .icon-btn {
+          font-size: 1.1em;
+        }
+
+        .sun {
+          width: 70px;
+          height: 70px;
+          top: 10%;
+          right: 3%;
+        }
+
+        .cloud-svg {
+          display: none;
+        }
+      }
+    </style>
   </head>
-  <body class="app-dark">
-    <!-- Centered dark-neon green panel on black background -->
+  <body class="app-light">
+    <!-- Background Animation -->
+    <div class="bg-animation">
+      <!-- Sun -->
+      <div class="sun"></div>
+
+      <!-- Floating Clouds with SVG -->
+      <svg
+        class="cloud-svg cloud-1"
+        viewBox="0 0 200 100"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <filter id="shadow">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+          </filter>
+        </defs>
+        <ellipse cx="50" cy="60" rx="40" ry="30" fill="#FFFFFF" opacity="0.9" />
+        <ellipse
+          cx="90"
+          cy="50"
+          rx="50"
+          ry="35"
+          fill="#FFFFFF"
+          opacity="0.95"
+        />
+        <ellipse
+          cx="140"
+          cy="60"
+          rx="35"
+          ry="28"
+          fill="#FFFFFF"
+          opacity="0.9"
+        />
+      </svg>
+
+      <svg
+        class="cloud-svg cloud-2"
+        viewBox="0 0 220 110"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <ellipse
+          cx="55"
+          cy="65"
+          rx="45"
+          ry="33"
+          fill="#FFFFFF"
+          opacity="0.92"
+        />
+        <ellipse
+          cx="100"
+          cy="55"
+          rx="55"
+          ry="37"
+          fill="#FFFFFF"
+          opacity="0.97"
+        />
+        <ellipse
+          cx="155"
+          cy="68"
+          rx="40"
+          ry="30"
+          fill="#FFFFFF"
+          opacity="0.91"
+        />
+      </svg>
+
+      <svg
+        class="cloud-svg cloud-3"
+        viewBox="0 0 180 85"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <ellipse
+          cx="45"
+          cy="55"
+          rx="38"
+          ry="28"
+          fill="#FFFFFF"
+          opacity="0.88"
+        />
+        <ellipse
+          cx="85"
+          cy="45"
+          rx="48"
+          ry="32"
+          fill="#FFFFFF"
+          opacity="0.93"
+        />
+        <ellipse
+          cx="130"
+          cy="58"
+          rx="33"
+          ry="26"
+          fill="#FFFFFF"
+          opacity="0.89"
+        />
+      </svg>
+
+      <svg
+        class="cloud-svg cloud-4"
+        viewBox="0 0 210 100"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <ellipse
+          cx="52"
+          cy="62"
+          rx="42"
+          ry="31"
+          fill="#FFFFFF"
+          opacity="0.90"
+        />
+        <ellipse
+          cx="95"
+          cy="52"
+          rx="52"
+          ry="36"
+          fill="#FFFFFF"
+          opacity="0.96"
+        />
+        <ellipse
+          cx="145"
+          cy="63"
+          rx="37"
+          ry="29"
+          fill="#FFFFFF"
+          opacity="0.90"
+        />
+      </svg>
+
+      <svg
+        class="cloud-svg cloud-5"
+        viewBox="0 0 190 90"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <ellipse
+          cx="48"
+          cy="58"
+          rx="40"
+          ry="30"
+          fill="#FFFFFF"
+          opacity="0.89"
+        />
+        <ellipse
+          cx="88"
+          cy="48"
+          rx="50"
+          ry="34"
+          fill="#FFFFFF"
+          opacity="0.94"
+        />
+        <ellipse
+          cx="138"
+          cy="60"
+          rx="35"
+          ry="27"
+          fill="#FFFFFF"
+          opacity="0.90"
+        />
+      </svg>
+
+      <svg
+        class="cloud-svg cloud-6"
+        viewBox="0 0 230 120"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <ellipse
+          cx="60"
+          cy="70"
+          rx="48"
+          ry="35"
+          fill="#FFFFFF"
+          opacity="0.91"
+        />
+        <ellipse
+          cx="110"
+          cy="60"
+          rx="58"
+          ry="38"
+          fill="#FFFFFF"
+          opacity="0.98"
+        />
+        <ellipse
+          cx="160"
+          cy="72"
+          rx="42"
+          ry="31"
+          fill="#FFFFFF"
+          opacity="0.92"
+        />
+      </svg>
+    </div>
+
+    <!-- Todo Panel -->
     <div class="todo-panel">
-      <!-- Panel header -->
       <header class="panel-header">
-        <h1 class="panel-title">Todo List</h1>
+        <h1 class="panel-title">📝 Todo List</h1>
         <p class="panel-subtitle">
-          A daily usage based App.&nbsp; Hello, {{ session.username }}
+          Welcome, <strong>{{ session.username }}</strong> – Manage Your Tasks
         </p>
-
-        <!-- Logout button, right-aligned via inline style (keeps layout intact) -->
-        <div style="text-align: right; margin-top: 8px">
-          <a class="btn ghost" href="{{ url_for('logout') }}">Logout</a>
+        <div style="text-align: right; margin-top: 15px; margin-bottom: 15px">
+          <a class="logout-btn" href="{{ url_for('logout') }}">🚪 Logout</a>
         </div>
-
         <hr class="panel-divider" />
       </header>
 
-      <!-- Add Task Form -->
       <form
         class="add-task"
         action="{{ url_for('create_task', page=page) }}"
@@ -36,15 +785,14 @@
         <input
           type="text"
           name="title"
-          placeholder="New Todo..."
+          placeholder="Add a new task..."
           maxlength="255"
           required
           aria-label="New todo title"
         />
-        <button type="submit" class="btn-add">ADD TODO</button>
+        <button type="submit" class="btn-add">✓ Add</button>
       </form>
 
-      <!-- Task List -->
       <ul class="task-list">
         {% for task in tasks %}
         <li
@@ -65,8 +813,6 @@
             />
             <span class="task-title">{{ task.title }}</span>
           </label>
-
-          <!-- Delete Task -->
           <form
             class="task-right"
             action="{{ url_for('delete_task', task_id=task.id, page=page) }}"
@@ -85,18 +831,22 @@
         {% endfor %}
       </ul>
 
-      <!-- Pagination -->
+      {% if not tasks %}
+      <div style="text-align: center; padding: 40px 20px; color: #90a4ae">
+        <p style="font-size: 1.1em; margin-bottom: 10px">✨ No tasks yet!</p>
+        <p>Create your first task above to get started.</p>
+      </div>
+      {% endif %}
+
       <nav class="pagination" aria-label="Pagination">
         {% if page > 1 %}
         <a class="btn ghost" href="{{ url_for('index', page=page-1) }}"
-          >← Prev</a
+          >← Previous</a
         >
         {% else %}
-        <span class="btn ghost disabled">← Prev</span>
+        <span class="btn ghost disabled">← Previous</span>
         {% endif %}
-
         <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
-
         {% if page < total_pages %}
         <a class="btn ghost" href="{{ url_for('index', page=page+1) }}"
           >Next →</a
@@ -108,9 +858,8 @@
     </div>
 
     <script>
-      // Toggle completion via fetch + update UI without reload
-      document.querySelectorAll(".task-item .toggle").forEach((cb) => {
-        cb.addEventListener("change", async (e) => {
+      document.querySelectorAll(". toggle").forEach((checkbox) => {
+        checkbox.addEventListener("change", async (e) => {
           const li = e.target.closest(".task-item");
           const id = li.dataset.taskId;
 
@@ -125,8 +874,8 @@
               li.classList.remove("completed");
             }
           } catch (err) {
-            alert("Error toggling task. Please try again.");
-            // Revert checkbox state if server failed
+            console.error("Error:", err);
+            alert("Error toggling task.  Please try again.");
             e.target.checked = !e.target.checked;
           }
         });

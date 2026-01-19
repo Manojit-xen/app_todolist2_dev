@@ -25,7 +25,7 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "replace-with-a-secret-key-123") 
 def get_conn():
     """Return a new MySQL connection (local defaults work without .env)."""
     return mysql.connector.connect(
-        host=os.getenv("DB_HOST", "host.docker.internal"),
+        host=os.getenv("DB_HOST"),
         port=int(os.getenv("DB_PORT", "3306")),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
